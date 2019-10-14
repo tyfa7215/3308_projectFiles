@@ -9,6 +9,8 @@
 from google.cloud import vision
 from google.oauth2 import service_account
 
+import webcolors
+
 # Command line Argument Parser
 import argparse
 
@@ -18,7 +20,7 @@ import io
 
 class ImageAnalyzer(object):
     credentials = service_account.Credentials.from_service_account_file(
-        'Brandsense-d2d2f258490c.json')
+        'Brandsense-ian.json')
 
     def __init__(self, img):
         """
@@ -70,34 +72,57 @@ class ImageAnalyzer(object):
         return logos_found
 
     def get_color(self):
+        pass
         """
         We could totally just use google cloud vision for this
         :return:
+        
+        response = self.client.image_properties(image=self.img)
+        props = response.image_properties_annotation
+        colors_found =[]
+
+        for color in props.dominant_colors.colors:
+            requested_color = (int(color.color.red), int(color.color.green), int(color.color.blue))
+            try:
+                closest_name = webcolors.rgb_to_name(requested_color)
+            except ValueError:
+                closest_name = closest_color(requested_color)
+            colors_found.append(closest_name)
+        return colors_found
         """
-        pass
 
     def get_text(self):
         """
         Google cloud vision
         :return:
         """
-        pass
+        response = self.client.text_detection(image=self.img)
+        texts = response.text_annotations
+
+        texts_found = []
+
+        for text in texts:
+            # Removes new lines characters
+            texts_found.append(text.description.strip('\n'))
+        # Google cloud vision likes to include duplicates so this removed them
+        return list(set(texts_found))
 
 
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser(description='Google Cloud vision implementation for BrandSense')
-    # parser.add_argument("--img")
+    parser = argparse.ArgumentParser(description='Google Cloud vision implementation for BrandSense')
+    parser.add_argument("--img")
 
-    # args = parser.parse_args()
+    args = parser.parse_args()
 
     # As of now im thinking saving the image to the server would be easiest. It might be cool
     # To add a PostgreSQL thing here where the javascript saves the image to the database.
     # Or we could save it to the database here and just pass a temp location.
     # We could also try using google's Buckets but this might be over complicating things, as then we would
     # be using different databases
-    #img_path = args.img
-    img_path = "nike-logo.png"
+    img_path = args.img
+    # img_path = "nike-logo.png"
     # Load img to our object
     image_analyzer = ImageAnalyzer(img_path)
-    print(image_analyzer.get_logo())
-
+    print('Logo: ', image_analyzer.get_logo())
+    print('Text in image: ', image_analyzer.get_text())
+    print('Colors: ', image_analyzer.get_color())
