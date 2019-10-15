@@ -71,29 +71,44 @@ class ImageAnalyzer(object):
                 logos_found.append(logo.description)
         return logos_found
 
+    @staticmethod
+    def closest_color(r_color):
+        """
+        Given a color tuple (r, g, b) it outputs the closest color
+        :param r_color:
+        :return:
+        """
+        min_colors = {}
+        for key, name in webcolors.css3_hex_to_names.items():
+            r_c, g_c, b_c = webcolors.hex_to_rgb(key)
+            rd = (r_c - r_color[0]) ** 2
+            gd = (g_c - r_color[1]) ** 2
+            bd = (b_c - r_color[2]) ** 2
+            min_colors[(rd + gd + bd)] = name
+        return min_colors[min(min_colors.keys())]
+
     def get_color(self):
-        pass
         """
         We could totally just use google cloud vision for this
         :return:
-        
+        """
         response = self.client.image_properties(image=self.img)
         props = response.image_properties_annotation
-        colors_found =[]
+        colors_found = []
 
-        for color in props.dominant_colors.colors:
+        # Only want to top 4 colors
+        for color in props.dominant_colors.colors[0:4]:
             requested_color = (int(color.color.red), int(color.color.green), int(color.color.blue))
             try:
                 closest_name = webcolors.rgb_to_name(requested_color)
             except ValueError:
-                closest_name = closest_color(requested_color)
+                closest_name = self.closest_color(requested_color)
             colors_found.append(closest_name)
         return colors_found
-        """
 
     def get_text(self):
         """
-        Google cloud vision
+        Google cloud vision, gets text in image
         :return:
         """
         response = self.client.text_detection(image=self.img)
@@ -109,6 +124,7 @@ class ImageAnalyzer(object):
 
 
 if __name__ == '__main__':
+    # To use this run the command as such: image_analysis.py --img=nike-logo.png
     parser = argparse.ArgumentParser(description='Google Cloud vision implementation for BrandSense')
     parser.add_argument("--img")
 
@@ -119,10 +135,13 @@ if __name__ == '__main__':
     # Or we could save it to the database here and just pass a temp location.
     # We could also try using google's Buckets but this might be over complicating things, as then we would
     # be using different databases
+    # Also although this is all in python we could also switch to using node.js i guess it also has
+    # the same abilities
     img_path = args.img
-    # img_path = "nike-logo.png"
+
     # Load img to our object
     image_analyzer = ImageAnalyzer(img_path)
     print('Logo: ', image_analyzer.get_logo())
     print('Text in image: ', image_analyzer.get_text())
     print('Colors: ', image_analyzer.get_color())
+
