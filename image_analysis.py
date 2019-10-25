@@ -20,41 +20,72 @@ import os
 import io
 
 
-class DataBase(object):
-    def __init__(self):
+class LogoDataBase(object):
+    connection = None
+
+    def __init__(self, database, user='postgres', passwd='123', host='localhost', port='5432'):
+        """
+        Create instance of connection
+        :param database: required
+        :param user:
+        :param passwd:
+        :param host:
+        :param port:
+        """
         try:
-            # host: 'localhost',
-            # 	port: 5432,
-            # 	database: 'football_db',
-            # 	user: 'postgres',
-            # 	password: '123'
-            connection = psycopg2.connect(user="postgres",
-                                          password="123",
-                                          host="localhost",
-                                          port="5432",
-                                          database="football_db")
+            # Create connection string
+            self.connection_str = f'user={user} password={passwd} host={host} port={port} dbname={database}'
 
-            cursor = connection.cursor()
-            # Print PostgreSQL Connection properties
+            # self.connection = psycopg2.connect(user=user, password=passwd, host=host, port=port, database=database)
+            self.connect()
             # print(connection.get_dsn_parameters(), "\n")
-
-            # Print PostgreSQL version
-            cursor.execute("SELECT * from football_games;")
-            record = cursor.fetchone()
-            print('First row:', record, "\n")
 
         except (Exception, psycopg2.Error) as error:
             print("Error while connecting to PostgreSQL", error)
 
-    def get_rows_from_image(self):
+    def connect(self):
+        self.connection = psycopg2.connect(self.connection_str)
+
+    def get_relevant_rows_from_logo(self, logo, logo_color, logo_text):
         """
         get image info. uses tag to create query
+        Here is what the library wiki says: Warning Never, never, NEVER use Python string concatenation (+) or string
+        parameters interpolation (%) to pass variables to a SQL query string. Not even at gunpoint.
+        Here is an example of the correct usage.
+        SQL = "INSERT INTO authors (name) VALUES (%s);" # Note: no quotes
+        data = ("O'Reilly", )
+        cur.execute(SQL, data) # Note: no % operator
         :return:
         """
-        pass
+        # TODO: put this all in a try-catch loop.
+        if not self.connection:
+            return None
+        query = "SELECT * FROM logos WHERE logo = %s"
+        cursor = self.connection.cursor()
 
-    def create_query(self, logo_name):
-        pass
+        cursor.execute(query, (logo,))
+
+        matching_logos = []
+
+        row = cursor.fetchone()
+        while row:
+            # parse row. These commented out line could be useful
+            # customer = row[0]
+            colors = row[2]
+            text = row[3]
+            # link = row[4]
+            # info = row[5]
+            # img = row[6]
+
+            if len(colors) is 0 and len(text) is 0:
+                matching_logos.append(row)
+            elif len(set(logo_color).intersection(set(colors))) > 0:
+                matching_logos.append(row)
+            elif len(set(logo_text).intersection(set(text))) > 0:
+                matching_logos.append(row)
+
+            row = cursor.fetchone()
+        return matching_logos
 
 
 class ImageAnalyzer(object):
@@ -73,7 +104,7 @@ class ImageAnalyzer(object):
         self.img_path = os.path.abspath(img)
 
         # Create Client. Use Google's authenticator to set credentials
-        # We can also set credentials with
+        # We can also set credentials with the bellow line. But id rather not
         # os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="Brandsense-d2d2f258490c.json"
         self.client = vision.ImageAnnotatorClient(credentials=self.credentials)
 
@@ -163,10 +194,7 @@ class ImageAnalyzer(object):
 
 
 if __name__ == '__main__':
-
-    db = DataBase()
-
-    # To use this run the command as such: image_analysis.py --img=nike-logo.png
+    # To use this file, run as such: image_analysis.py --img=nike-logo.png
     parser = argparse.ArgumentParser(description='Google Cloud vision implementation for BrandSense')
     parser.add_argument("--img")
 
@@ -179,12 +207,21 @@ if __name__ == '__main__':
     # be using different databases
     # Also although this is all in python we could also switch to using node.js i guess it also has
     # the same abilities
-    if args.img:
-        img_path = args.img
+    db = LogoDataBase(database="brandsense_db")
 
+    img_path = args.img
+    if img_path:
         # Load img to our object
         image_analyzer = ImageAnalyzer(img_path)
-        print('Logo: ', image_analyzer.get_logo())
-        print('Text in image: ', image_analyzer.get_text())
-        print('Colors: ', image_analyzer.get_color())
+
+        logos_detected = image_analyzer.get_logo()
+        text_detected = image_analyzer.get_text()
+        colors_detected = image_analyzer.get_color()
+
+        print('Logo: ', logos_detected)
+        print('Text in image: ', text_detected)
+        print('Colors: ', colors_detected)
+
+        for l in logos_detected:
+            print(l, db.get_relevant_rows_from_logo(l, colors_detected, text_detected))
 
