@@ -14,8 +14,47 @@ import webcolors
 # Command line Argument Parser
 import argparse
 
+import psycopg2
+
 import os
 import io
+
+
+class DataBase(object):
+    def __init__(self):
+        try:
+            # host: 'localhost',
+            # 	port: 5432,
+            # 	database: 'football_db',
+            # 	user: 'postgres',
+            # 	password: '123'
+            connection = psycopg2.connect(user="postgres",
+                                          password="123",
+                                          host="localhost",
+                                          port="5432",
+                                          database="football_db")
+
+            cursor = connection.cursor()
+            # Print PostgreSQL Connection properties
+            # print(connection.get_dsn_parameters(), "\n")
+
+            # Print PostgreSQL version
+            cursor.execute("SELECT * from football_games;")
+            record = cursor.fetchone()
+            print('First row:', record, "\n")
+
+        except (Exception, psycopg2.Error) as error:
+            print("Error while connecting to PostgreSQL", error)
+
+    def get_rows_from_image(self):
+        """
+        get image info. uses tag to create query
+        :return:
+        """
+        pass
+
+    def create_query(self, logo_name):
+        pass
 
 
 class ImageAnalyzer(object):
@@ -124,6 +163,9 @@ class ImageAnalyzer(object):
 
 
 if __name__ == '__main__':
+
+    db = DataBase()
+
     # To use this run the command as such: image_analysis.py --img=nike-logo.png
     parser = argparse.ArgumentParser(description='Google Cloud vision implementation for BrandSense')
     parser.add_argument("--img")
@@ -137,11 +179,12 @@ if __name__ == '__main__':
     # be using different databases
     # Also although this is all in python we could also switch to using node.js i guess it also has
     # the same abilities
-    img_path = args.img
+    if args.img:
+        img_path = args.img
 
-    # Load img to our object
-    image_analyzer = ImageAnalyzer(img_path)
-    print('Logo: ', image_analyzer.get_logo())
-    print('Text in image: ', image_analyzer.get_text())
-    print('Colors: ', image_analyzer.get_color())
+        # Load img to our object
+        image_analyzer = ImageAnalyzer(img_path)
+        print('Logo: ', image_analyzer.get_logo())
+        print('Text in image: ', image_analyzer.get_text())
+        print('Colors: ', image_analyzer.get_color())
 
