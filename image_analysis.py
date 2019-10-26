@@ -25,7 +25,7 @@ class LogoDataBase(object):
 
     def __init__(self, database, user='postgres', passwd='123', host='localhost', port='5432'):
         """
-        Create instance of connection
+        Create instance of connection. Saves the connection string if we need to reconnect for any reason.
         :param database: required
         :param user:
         :param passwd:
@@ -36,9 +36,7 @@ class LogoDataBase(object):
             # Create connection string
             self.connection_str = f'user={user} password={passwd} host={host} port={port} dbname={database}'
 
-            # self.connection = psycopg2.connect(user=user, password=passwd, host=host, port=port, database=database)
             self.connect()
-            # print(connection.get_dsn_parameters(), "\n")
 
         except (Exception, psycopg2.Error) as error:
             print("Error while connecting to PostgreSQL", error)
@@ -57,7 +55,7 @@ class LogoDataBase(object):
         cur.execute(SQL, data) # Note: no % operator
         :return:
         """
-        # TODO: put this all in a try-catch loop.
+        # TODO: put this all in a try-catch loop. We need to figure out what exceptions to catch
         if not self.connection:
             return None
         query = "SELECT * FROM logos WHERE logo = %s"
@@ -77,6 +75,9 @@ class LogoDataBase(object):
             # info = row[5]
             # img = row[6]
 
+            # TODO: the more i think about this, it doesnt work. If we a blue nike logo uploaded it could also output
+            #  a pink one if they had the same text. SO we might want to look for both and if we cant find both then
+            #  return a single one.
             if len(colors) is 0 and len(text) is 0:
                 matching_logos.append(row)
             elif len(set(logo_color).intersection(set(colors))) > 0:
@@ -86,6 +87,24 @@ class LogoDataBase(object):
 
             row = cursor.fetchone()
         return matching_logos
+
+    def insert_logo(self, customer, logo, colors, text, link, info):
+        # TODO: we need to make this a bit better protected. or we really don't i guess
+        cursor = self.connection.cursor()
+
+        logo_insert_query = """INSERT INTO logos(customer , logo, colors, text, link, info)
+                                           VALUES(%s, %s, %s, %s, %s, %s);"""
+        logo_info = (customer, logo, colors, text, link, info)
+
+        try:
+            cursor.execute(logo_insert_query, logo_info)
+            self.connection.commit()
+
+            count = cursor.rowcount
+            print(count, "Record inserted successfully into mobile table")
+            return True
+        except:  # TODO make this better, and not a bare exception clause.
+            return False
 
 
 class ImageAnalyzer(object):
@@ -193,35 +212,89 @@ class ImageAnalyzer(object):
         return list(set(texts_found))
 
 
+# TODO: these two functions act as examples. We need to figure out how to structure them
+def user_execution(img_loc):
+    """
+    This may be en example of a function the user would call.
+    The user would click on the button and it would provide the result from the db
+    :param img_loc: location in server file system
+    :return: array of strings to be displayed
+    """
+    # we will create a new instance of the database connection.
+    db = LogoDataBase(database="brandsense_db")
+    # Create instance of our image analysis. This will create our cloud vision image obj
+    image_analyzer = ImageAnalyzer(img_loc)
+
+    logos = image_analyzer.get_logo()
+    if len(logos) is not 0:
+        text = image_analyzer.get_text()
+        colors = image_analyzer.get_color()
+
+        # An image could have multiple logos. For now we will search for all of them
+        relevant_rows = []
+        for logo in logos:
+            relevant_rows.append(db.get_relevant_rows_from_logo(logo, colors, text))
+        # This should always be in the form of a multidimensional array of strings
+
+        if len(relevant_rows[0]) is 0:
+            return logos
+        return relevant_rows
+
+    else:
+        # Not totally sure what we want to do here
+        return "Could not find Logo"
+
+
+def client_upload(customer, link, info, img_loc):
+    """
+    With provided link and img. we will upload to database. This is a big work in progress.
+    Im not sure what we want here.
+    :param customer:
+    :param link:
+    :param info:
+    :param img_loc:
+    :return:
+    """
+    # TODO: Add duplicate upload prevention.
+    # we will create a new instance of the database connection.
+    db = LogoDataBase(database="brandsense_db")
+    # Create instance of our image analysis. This will create our cloud vision image obj
+    image_analyzer = ImageAnalyzer(img_loc)
+
+    logos = image_analyzer.get_logo()
+    if len(logos) is not 0:
+        text = image_analyzer.get_text()
+        colors = image_analyzer.get_color()
+        for logo in logos:
+            # This might be a special case for more than one logo. right now we only want the first
+            if not db.insert_logo(customer, logo, colors, text, link, info):
+                return "failed upload"
+            break
+        return "Successful upload"
+    else:
+        return "Failed to add image"
+
+
 if __name__ == '__main__':
     # To use this file, run as such: image_analysis.py --img=nike-logo.png
     parser = argparse.ArgumentParser(description='Google Cloud vision implementation for BrandSense')
     parser.add_argument("--img")
+    parser.add_argument("--user")
 
+    # simple argument parser. to get image from running command, and user.
     args = parser.parse_args()
-
-    # As of now im thinking saving the image to the server would be easiest. It might be cool
-    # To add a PostgreSQL thing here where the javascript saves the image to the database.
-    # Or we could save it to the database here and just pass a temp location.
-    # We could also try using google's Buckets but this might be over complicating things, as then we would
-    # be using different databases
-    # Also although this is all in python we could also switch to using node.js i guess it also has
-    # the same abilities
-    db = LogoDataBase(database="brandsense_db")
-
     img_path = args.img
+
+    # 'user' or 'client'.
+    if args.user:
+        user = args.user
+    else:
+        user = 'user'
+
     if img_path:
-        # Load img to our object
-        image_analyzer = ImageAnalyzer(img_path)
-
-        logos_detected = image_analyzer.get_logo()
-        text_detected = image_analyzer.get_text()
-        colors_detected = image_analyzer.get_color()
-
-        print('Logo: ', logos_detected)
-        print('Text in image: ', text_detected)
-        print('Colors: ', colors_detected)
-
-        for l in logos_detected:
-            print(l, db.get_relevant_rows_from_logo(l, colors_detected, text_detected))
+        print(user)
+        if str(user).strip() in 'client':
+            print(client_upload('Adidas', 'https://www.adidas.com/us', 'boost product', img_path))
+        else:
+            print(user_execution(img_path))
 
