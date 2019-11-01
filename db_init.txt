@@ -4,9 +4,11 @@ CREATE TABLE brandsense_db
 
 then run these to create table
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-DROP TABLE logos
+DROP TABLE logos;
 CREATE TABLE IF NOT EXISTS logos(
+  logo_id uuid DEFAULT uuid_generate_v4(),
   customer VARCHAR(50) NOT NULL,
   logo VARCHAR(50) NOT NULL,
   colors VARCHAR(50)[],
@@ -16,6 +18,6 @@ CREATE TABLE IF NOT EXISTS logos(
   img BYTEA
 );
 
-INSERT INTO logos(customer , logo, colors, text, link, info)
-VALUES('Nike', 'Nike', ARRAY ['deeppink', 'palevioletred', 'plum', 'white'], ARRAY[]::VARCHAR(50)[], 'https://www.nike.com/', 'Breast Cancer Awareness')
-('Kroger', 'King Soopers', ARRAY ['yellow', 'crimson', 'white', 'darkorange'], ARRAY ['KING Soopers', 'KING', 'Soopers'], 'https://www.kingsoopers.com/', 'A store');
+INSERT INTO logos(logo_id, customer, logo, colors, text, link, info)
+VALUES(uuid_generate_v4(), 'Nike', 'Nike', ARRAY ['deeppink', 'palevioletred', 'plum', 'white'], ARRAY[]::VARCHAR(50)[], 'https://www.nike.com/', 'Breast Cancer Awareness'),
+(uuid_generate_v4(), 'Kroger', 'King Soopers', ARRAY ['yellow', 'crimson', 'white', 'darkorange'], ARRAY ['KING Soopers', 'KING', 'Soopers'], 'https://www.kingsoopers.com/', 'A store');

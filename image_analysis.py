@@ -103,7 +103,7 @@ class LogoDataBase(object):
             count = cursor.rowcount
             print(count, "Record inserted successfully into mobile table")
             return True
-        except:  # TODO make this better, and not a bare exception clause.
+        except(Exception, psycopg2.Error):  # as error:
             return False
 
 
