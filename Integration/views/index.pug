@@ -1,0 +1,22 @@
+doctype html
+html(lang='en', dir='ltr')
+  head
+    meta(charset='utf-8')
+    link(rel='stylesheet', href='css/styles.css')
+    title BrandSense
+  body
+    .mainNav
+      .brand BrandSense
+      a(href='scans.html') Scans
+      a(href='about.html') About
+      a(href='home.html') Home
+    #uploadButton
+      .btn.btn-blob
+        form(action='/upload', method='post', enctype='multipart/form-data', id='image_upload')
+          input.upload(type='file', accept='image/*', name='photo', onchange='submitImage()')
+        script.cssdeck(src='//cdnjs.cloudflare.com/ajax/libs/jquery/1.8.0/jquery.min.js')
+
+  script.
+    function submitImage(){
+    document.getElementById("image_upload").submit();
+    }
