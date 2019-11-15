@@ -1,7 +1,7 @@
 # Refer to this link for  getting started https://pypi.org/project/google-cloud-vision/
 # Also please make sure you are running python 3.6 or 3.7  or higher
 # After installing google cloud vision DO NOT commit the py files for it. If you are using
-# Pycharm there should be a Base foulder. Do not commit this. You can add it to the ignore list
+# Pycharm there should be a Base folder. Do not commit this. You can add it to the ignore list
 
 # To install google cloud vision please follow instruction on link above
 
@@ -11,19 +11,21 @@ from google.oauth2 import service_account
 
 import webcolors
 
-# Command line Argument Parser
-import argparse
-
 import psycopg2
 
 import os
 import io
+import sys
+import string
+
+# This was added to clean the text. We don't want as much jiberish.
+stop_words = ['tm', 'all', 'just', 'brands', 'being', 'over', 'both', 'through', 'may', 'copyright', 'yourselves', 'its', 'before', 'herself', 'had', 'should', 'to', 'only', 'under', 'ours', 'has', 'do', 'them', 'his', 'very', 'they', 'not', 'during', 'now', 'him', 'nor', 'did', 'this', 'she', 'each', 'further', 'where', 'few', 'because', 'doing', 'some', 'are', 'our', 'ourselves', 'out', 'what', 'for', 'while', 'does', 'above', 'between', 't', 'be', 'we', 'who', 'were', 'here', 'hers', 'by', 'on', 'about', 'of', 'against', 's', 'or', 'own', 'into', 'yourself', 'down', 'your', 'from', 'her', 'their', 'there', 'been', 'whom', 'too', 'themselves', 'was', 'until', 'more', 'himself', 'that', 'but', 'don', 'with', 'than', 'those', 'he', 'me', 'myself', 'these', 'up', 'will', 'below', 'can', 'theirs', 'my', 'and', 'then', 'is', 'am', 'it', 'an', 'as', 'itself', 'at', 'have', 'in', 'any', 'if', 'again', 'no', 'when', 'same', 'how', 'other', 'which', 'you', 'after', 'most', 'such', 'why', 'a', 'off', 'i', 'yours', 'so', 'the', 'having', 'once']
 
 
 class LogoDataBase(object):
     connection = None
 
-    def __init__(self, database, user='postgres', passwd='123', host='localhost', port='5432'):
+    def __init__(self, database='brandsense_db', user='postgres', passwd='123', host='localhost', port='5432'):
         """
         Create instance of connection. Saves the connection string if we need to reconnect for any reason.
         :param database: required
@@ -33,7 +35,8 @@ class LogoDataBase(object):
         :param port:
         """
         try:
-            # Create connection string
+            # Create connection string. This lib does also have another ctor for this but this wat we can easily
+            # save our creds.
             self.connection_str = f'user={user} password={passwd} host={host} port={port} dbname={database}'
 
             self.connect()
@@ -61,29 +64,33 @@ class LogoDataBase(object):
         query = "SELECT * FROM logos WHERE logo = %s"
         cursor = self.connection.cursor()
 
-        cursor.execute(query, (logo,))
+        try:
+            cursor.execute(query, (logo,))
+        except(Exception, psycopg2.Error):
+            print("Failed to execute postgres query")
+            return []
 
         matching_logos = []
 
         row = cursor.fetchone()
         while row:
             # parse row. These commented out line could be useful
-            # customer = row[0]
-            colors = row[2]
-            text = row[3]
+            logo_id = row[0]
+            colors = row[3]
+            text = row[4]
             # link = row[4]
             # info = row[5]
             # img = row[6]
 
-            # TODO: the more i think about this, it doesnt work. If we a blue nike logo uploaded it could also output
+            # TODO: the more i think about this, it doesnt work. If a blue nike logo uploaded it could also output
             #  a pink one if they had the same text. SO we might want to look for both and if we cant find both then
-            #  return a single one.
+            #  return a single one. But we could also just make text specific and this will be ok.
             if len(colors) is 0 and len(text) is 0:
-                matching_logos.append(row)
+                matching_logos.append(logo_id)
             elif len(set(logo_color).intersection(set(colors))) > 0:
-                matching_logos.append(row)
+                matching_logos.append(logo_id)
             elif len(set(logo_text).intersection(set(text))) > 0:
-                matching_logos.append(row)
+                matching_logos.append(logo_id)
 
             row = cursor.fetchone()
         return matching_logos
@@ -92,7 +99,7 @@ class LogoDataBase(object):
         # TODO: we need to make this a bit better protected. or we really don't i guess
         cursor = self.connection.cursor()
 
-        logo_insert_query = """INSERT INTO logos(customer , logo, colors, text, link, info)
+        logo_insert_query = """INSERT INTO logos(customer ,logo , colors, text, link, info)
                                            VALUES(%s, %s, %s, %s, %s, %s);"""
         logo_info = (customer, logo, colors, text, link, info)
 
@@ -119,7 +126,6 @@ class ImageAnalyzer(object):
         :param img:
         :return:
         """
-
         self.img_path = os.path.abspath(img)
 
         # Create Client. Use Google's authenticator to set credentials
@@ -156,7 +162,7 @@ class ImageAnalyzer(object):
 
         logos_found = []
         for logo in logos:
-            if float(logo.score) > .75:
+            if float(logo.score) > .6:
                 logos_found.append(logo.description)
         return logos_found
 
@@ -207,13 +213,16 @@ class ImageAnalyzer(object):
 
         for text in texts:
             # Removes new lines characters
-            texts_found.append(text.description.strip('\n'))
+            for text in texts:
+                # Removes new lines characters
+                w = text.description.strip('\n')
+                if w.translate(str.maketrans('', '', string.punctuation)).lower() not in stop_words:
+                    texts_found.append(w)
         # Google cloud vision likes to include duplicates so this removed them
         return list(set(texts_found))
 
 
-# TODO: these two functions act as examples. We need to figure out how to structure them
-def user_execution(img_loc):
+def user_execution_db(img_loc):
     """
     This may be en example of a function the user would call.
     The user would click on the button and it would provide the result from the db
@@ -224,8 +233,12 @@ def user_execution(img_loc):
     db = LogoDataBase(database="brandsense_db")
     # Create instance of our image analysis. This will create our cloud vision image obj
     image_analyzer = ImageAnalyzer(img_loc)
+    try:
+        logos = image_analyzer.get_logo()
+    except Exception as e:
+        print("Failed connect. Try again later")
+        return "Error"
 
-    logos = image_analyzer.get_logo()
     if len(logos) is not 0:
         text = image_analyzer.get_text()
         colors = image_analyzer.get_color()
@@ -241,8 +254,38 @@ def user_execution(img_loc):
         return relevant_rows
 
     else:
+        return f"Error: Unable to detect logo in image"
+
+
+def user_execution(img_loc):
+    """
+    This may be en example of a function the user would call.
+    The user would click on the button and it would provide the result
+    :param img_loc: location in server file system
+    :return: array of strings to be displayed
+    """
+    # Create instance of our image analysis. This will create our cloud vision image obj
+    image_analyzer = ImageAnalyzer(img_loc)
+    try:
+        logos = image_analyzer.get_logo()
+    except Exception as e:
+        return "Error: failed to establish connection with google cloud vision api. Try again later."
+
+    if len(logos) is not 0:
+        text = image_analyzer.get_text()
+        colors = image_analyzer.get_color()
+
+        # An image could have multiple logos. For now we will search for all of them
+        relevant_rows = []
+        for logo in logos:
+            relevant_rows.append((logo, text, colors))
+
+        return relevant_rows
+
+    else:
         # Not totally sure what we want to do here
-        return "Could not find Logo"
+        text = image_analyzer.get_text()
+        return "Error: unable to detect logo in image."
 
 
 def client_upload(customer, link, info, img_loc):
@@ -276,25 +319,38 @@ def client_upload(customer, link, info, img_loc):
 
 
 if __name__ == '__main__':
-    # To use this file, run as such: image_analysis.py --img=nike-logo.png
-    parser = argparse.ArgumentParser(description='Google Cloud vision implementation for BrandSense')
-    parser.add_argument("--img")
-    parser.add_argument("--user")
+    # Example Usage: Be careful with the arguments and make sure you use "" around them, as this program assumes the
+    # order that the argument are provided.
+    # Retrieve analysis from google: image_analysis.py <relative_image_path>
+    # Retrieve "relevant rows" from db: image_analysis.py <relative_image_path> T
+    # Save data to db: image_analysis.py <relative_image_path> T T <link> <description> <client(optional)>
+    # Example image_analysis.py starbucks.jpg T
+    img_path = None
+    use_db = False
+    if len(sys.argv) > 1:
+        img_path = sys.argv[1]
+        if len(sys.argv) > 2:
+            use_db = (sys.argv[2].lower() in 't' or sys.argv[2].lower in 'true')
+            # We are forced to add these checks because we don't want any extra characters to break this and break the
+            # db
 
-    # simple argument parser. to get image from running command, and user.
-    args = parser.parse_args()
-    img_path = args.img
-
-    # 'user' or 'client'.
-    if args.user:
-        user = args.user
-    else:
-        user = 'user'
+    if img_path is None:
+        print(f'Image error. Invalid image location: {img_path}')
 
     if img_path:
-        print(user)
-        if str(user).strip() in 'client':
-            print(client_upload('Adidas', 'https://www.adidas.com/us', 'boost product', img_path))
+        if use_db:
+            if len(sys.argv) > 5 and (sys.argv[3].lower() in 't' or sys.argv[3].lower in 'true'):
+                # When typing these in, pleas insure you include "" around them
+                link_str = sys.argv[4]
+                desc_str = sys.argv[5]
+                if len(sys.argv) > 6:
+                    client_str = sys.argv[6]
+                else:
+                    client_str = ''
+                print(client_upload(client_str, link_str, desc_str, img_path))
+            else:
+                print(user_execution_db(img_path))
         else:
             print(user_execution(img_path))
+
 
