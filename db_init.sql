@@ -29,5 +29,13 @@ CREATE TABLE IF NOT EXISTS userHistory(
   img BYTEA,
   url VARCHAR(300),
   colors VARCHAR(50)[],
-  text VARCHAR(50)[]
+  text VARCHAR(50)[],
+  username VARCHAR(50)
+);
+
+
+DROP TABLE users;
+CREATE TABLE IF NOT EXISTS users(
+  username VARCHAR(50) PRIMARY KEY,
+  password VARCHAR(50)
 );
