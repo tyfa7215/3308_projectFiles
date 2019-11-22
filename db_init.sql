@@ -28,6 +28,17 @@ CREATE TABLE IF NOT EXISTS userHistory(
   histID uuid DEFAULT uuid_generate_v4(),
   img BYTEA,
   url VARCHAR(300),
+  logo VARCHAR(300),
   colors VARCHAR(50)[],
-  text VARCHAR(50)[]
+  text VARCHAR(50)[],
+  username VARCHAR(50)
 );
+
+-- Users table with username as primary key
+DROP TABLE users;
+CREATE TABLE IF NOT EXISTS users(
+  username VARCHAR(50) PRIMARY KEY,
+  password VARCHAR(50)
+);
+
+INSERT INTO users(username, password) VALUES('ian', '123');
