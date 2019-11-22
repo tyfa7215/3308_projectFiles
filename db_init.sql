@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS userHistory(
   username VARCHAR(50)
 );
 
-
+-- Users table with username as primary key
 DROP TABLE users;
 CREATE TABLE IF NOT EXISTS users(
   username VARCHAR(50) PRIMARY KEY,
