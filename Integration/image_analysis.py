@@ -108,7 +108,28 @@ class LogoDataBase(object):
             self.connection.commit()
 
             count = cursor.rowcount
-            print(count, "Record inserted successfully into mobile table")
+            print(count, "Record inserted successfully into logo table")
+            return True
+        except(Exception, psycopg2.Error):  # as error:
+            return False
+
+    def save_history(self, img, user_id=None):
+        with open(img, "rb") as image:
+            f = image.read()
+            b = bytearray(f)
+            img_data = psycopg2.Binary(b)
+        hist_insert_query = """INSERT INTO userHistory(img, username)
+                                                   VALUES(%s, %s);"""
+        hist_info = (img_data, user_id)
+
+        cursor = self.connection.cursor()
+
+        try:
+            cursor.execute(hist_insert_query, hist_info)
+            self.connection.commit()
+
+            count = cursor.rowcount
+            print(count, "Record inserted successfully into history table table")
             return True
         except(Exception, psycopg2.Error):  # as error:
             return False
@@ -222,7 +243,7 @@ class ImageAnalyzer(object):
         return list(set(texts_found))
 
 
-def user_execution_db(img_loc):
+def user_execution_db(img_loc, username="default"):
     """
     This may be en example of a function the user would call.
     The user would click on the button and it would provide the result from the db
@@ -233,6 +254,7 @@ def user_execution_db(img_loc):
     db = LogoDataBase(database="brandsense_db")
     # Create instance of our image analysis. This will create our cloud vision image obj
     image_analyzer = ImageAnalyzer(img_loc)
+    db.save_history(image_analyzer.img_path, username)
     try:
         logos = image_analyzer.get_logo()
     except Exception as e:
@@ -257,7 +279,7 @@ def user_execution_db(img_loc):
         return f"Error: Unable to detect logo in image"
 
 
-def user_execution(img_loc):
+def user_execution(img_loc, username="default"):
     """
     This may be en example of a function the user would call.
     The user would click on the button and it would provide the result
@@ -266,6 +288,9 @@ def user_execution(img_loc):
     """
     # Create instance of our image analysis. This will create our cloud vision image obj
     image_analyzer = ImageAnalyzer(img_loc)
+    db = LogoDataBase(database="brandsense_db")
+    db.save_history(image_analyzer.img_path, username)
+
     try:
         logos = image_analyzer.get_logo()
     except Exception as e:
@@ -321,16 +346,20 @@ def client_upload(customer, link, info, img_loc):
 if __name__ == '__main__':
     # Example Usage: Be careful with the arguments and make sure you use "" around them, as this program assumes the
     # order that the argument are provided.
-    # Retrieve analysis from google: image_analysis.py <relative_image_path>
-    # Retrieve "relevant rows" from db: image_analysis.py <relative_image_path> T
-    # Save data to db: image_analysis.py <relative_image_path> T T <link> <description> <client(optional)>
-    # Example image_analysis.py starbucks.jpg T
+    # Retrieve analysis from google: image_analysis.py <relative_image_path> F <Username>
+    # Retrieve "relevant rows" from db: image_analysis.py <relative_image_path> T <Username>
+    # Save data to db: image_analysis.py <relative_image_path> T None T <link> <description> <client(optional)>
+    # Example image_analysis.py starbucks.jpg T Ian
+    # UGHGH
     img_path = None
     use_db = False
+    username = "default"
     if len(sys.argv) > 1:
         img_path = sys.argv[1]
         if len(sys.argv) > 2:
-            use_db = (sys.argv[2].lower() in 't' or sys.argv[2].lower in 'true')
+            use_db = (sys.argv[2].lower() == 't' or sys.argv[2].lower == 'true')
+            if len(sys.argv) > 3:
+                username = sys.argv[3]
             # We are forced to add these checks because we don't want any extra characters to break this and break the
             # db
 
@@ -339,17 +368,17 @@ if __name__ == '__main__':
 
     if img_path:
         if use_db:
-            if len(sys.argv) > 5 and (sys.argv[3].lower() in 't' or sys.argv[3].lower in 'true'):
+            if len(sys.argv) > 6 and (sys.argv[4].lower() in 't' or sys.argv[4].lower in 'true'):
                 # When typing these in, pleas insure you include "" around them
-                link_str = sys.argv[4]
-                desc_str = sys.argv[5]
-                if len(sys.argv) > 6:
-                    client_str = sys.argv[6]
+                link_str = sys.argv[5]
+                desc_str = sys.argv[6]
+                if len(sys.argv) > 7:
+                    client_str = sys.argv[7]
                 else:
                     client_str = ''
                 print(client_upload(client_str, link_str, desc_str, img_path))
             else:
-                print(user_execution_db(img_path))
+                print(user_execution_db(img_path, username))
         else:
-            print(user_execution(img_path))
+            print(user_execution(img_path, username))
 
