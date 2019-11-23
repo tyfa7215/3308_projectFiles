@@ -10,6 +10,11 @@ html(lang='en', dir='ltr')
       a(href='/scans') Scans
       a(href='about.html') About
       a(href='/') Home
+      .login-container
+        form(action='#')
+          input(type='text', placeholder='Username', name='username')
+          input(type='password', placeholder='Password', name='psw')
+          button(type='submit') Login
     #uploadButton
       .btn.btn-blob
         form(action='/upload', method='post', enctype='multipart/form-data', id='image_upload')
