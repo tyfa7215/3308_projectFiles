@@ -15,14 +15,14 @@ app.use(
   })
 )
 
-const username = "test";
+const username = "ian";
 
 const dbConfig = {
 	host: 'localhost',
 	port: 5432,
-	database: 'football_db',
+	database: 'brandsense_db',
 	user: 'postgres',
-	password: '12345'
+	password: '123'
 };
 
 let db = pgp(dbConfig);
@@ -45,13 +45,17 @@ app.post('/upload', upload.single('photo'), (req, res) => {
         
         //create child process, running python script and passing image as parameter
         var spawn = require("child_process").spawn;
-		var process = spawn('python',["./image_analysis.py","uploads/images/"+req.file.filename] );
+        // We should do this. We can also set the 'T' to an 'F' and we would have what we had before.
+        var process = spawn('python',["./image_analysis.py","uploads/images/"+req.file.filename, 'T', username]);
+		// Here is what it was
+		// var process = spawn('python',["./image_analysis.py","uploads/images/"+req.file.filename] );
 
 		//display return data from python script
 
-
 		//need to parse the return data to start the SQL query stuff
-		process.stdout.on('data', function(data) { 
+		// All that need to be done is grabbing the row with the id that was spit out from the python. We do want
+		// a check to make sure it didn't return "not found" or something.
+		process.stdout.on('data', function(data) {
 	        res.send(data.toString()); 
 	    } ) 
     }
@@ -59,17 +63,35 @@ app.post('/upload', upload.single('photo'), (req, res) => {
 });
 
 app.get('/scans',function(req,res){
-	var q = 'select * from userHistory where username='+username+';';
-	db.any(q)
-	 .then(function (rows) {
+	// This is the only safe way to have parameters for postgres
+    const query = "select * from userHistory where username=$1 LIMIT 5"
+	// callback
+
+    db.any(query, [username]).then(function (rows) {
+		scan_hist = []
+		for (i = 0; i < rows.length; i++)
+		{
+			// This displays an image, from the database
+			// Text doesnt display. But at least it can pull the images and display those.
+			// The db needs an idea of time. We can add an incrementing int and grab the biggest 5
+			var history = {
+				'img': 'data:image/jpg;base64,' + Buffer.from(rows[i].img).toString('base64'),
+				'url': "N/A",
+				'colors': "N/A",
+				'text': "N/A"
+			}
+			scan_hist.push(history)
+		}
+		console.log(scan_hist)
 	    res.render('scans',{
-	  my_title: "Scans",
-	  local_css:"styles.css",
-	  user_history: rows,
-	})
+	        my_title: "Scans",
+	        local_css:"styles.css",
+	        user_history: scan_hist,
+	    })
 
 	})
 	.catch(function (err) {
+		console.log('ERROR, ' + err)
 	    // display error message in case an error
 	    request.flash('error', err);
 	    res.render('scans',{

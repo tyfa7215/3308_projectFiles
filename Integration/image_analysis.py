@@ -19,6 +19,8 @@ import sys
 import string
 
 # This was added to clean the text. We don't want as much jiberish.
+# But then again we might actually want the jiberish. We still would want to remove some tings.
+#  stop_words = ['tm, copyright']
 stop_words = ['tm', 'all', 'just', 'brands', 'being', 'over', 'both', 'through', 'may', 'copyright', 'yourselves', 'its', 'before', 'herself', 'had', 'should', 'to', 'only', 'under', 'ours', 'has', 'do', 'them', 'his', 'very', 'they', 'not', 'during', 'now', 'him', 'nor', 'did', 'this', 'she', 'each', 'further', 'where', 'few', 'because', 'doing', 'some', 'are', 'our', 'ourselves', 'out', 'what', 'for', 'while', 'does', 'above', 'between', 't', 'be', 'we', 'who', 'were', 'here', 'hers', 'by', 'on', 'about', 'of', 'against', 's', 'or', 'own', 'into', 'yourself', 'down', 'your', 'from', 'her', 'their', 'there', 'been', 'whom', 'too', 'themselves', 'was', 'until', 'more', 'himself', 'that', 'but', 'don', 'with', 'than', 'those', 'he', 'me', 'myself', 'these', 'up', 'will', 'below', 'can', 'theirs', 'my', 'and', 'then', 'is', 'am', 'it', 'an', 'as', 'itself', 'at', 'have', 'in', 'any', 'if', 'again', 'no', 'when', 'same', 'how', 'other', 'which', 'you', 'after', 'most', 'such', 'why', 'a', 'off', 'i', 'yours', 'so', 'the', 'having', 'once']
 
 
@@ -113,7 +115,9 @@ class LogoDataBase(object):
         except(Exception, psycopg2.Error):  # as error:
             return False
 
-    def save_history(self, img, user_id=None):
+    def save_history(self, img, user_id='default'):
+        if user_id == 'default':
+            return True
         with open(img, "rb") as image:
             f = image.read()
             b = bytearray(f)
@@ -129,7 +133,6 @@ class LogoDataBase(object):
             self.connection.commit()
 
             count = cursor.rowcount
-            print(count, "Record inserted successfully into history table table")
             return True
         except(Exception, psycopg2.Error):  # as error:
             return False

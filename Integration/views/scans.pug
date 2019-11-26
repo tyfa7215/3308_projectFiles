@@ -22,9 +22,10 @@ head
               th URL
               th Colors
               th Text
-            for (item in user_history)
+            each item in user_history
               tr
-                td=item.img
+                td
+                  img.image(src= item.img, alt='image')
                 td=item.url
                 td=item.colors
                 td=item.text
