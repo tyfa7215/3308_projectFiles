@@ -4,8 +4,6 @@ CREATE TABLE brandsense_db
 
 then run these to create table
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 DROP TABLE logos;
 CREATE TABLE IF NOT EXISTS logos(
   logo_id uuid DEFAULT uuid_generate_v4(),
@@ -22,10 +20,12 @@ INSERT INTO logos(logo_id, customer, logo, colors, text, link, info)
 VALUES(uuid_generate_v4(), 'Nike', 'Nike', ARRAY ['deeppink', 'palevioletred', 'plum', 'white'], ARRAY[]::VARCHAR(50)[], 'https://www.nike.com/', 'Breast Cancer Awareness'),
 (uuid_generate_v4(), 'Kroger', 'King Soopers', ARRAY ['yellow', 'crimson', 'white', 'darkorange'], ARRAY ['KING Soopers', 'KING', 'Soopers'], 'https://www.kingsoopers.com/', 'A store');
 
-
+-- everything needed for history table
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 DROP TABLE userHistory;
 CREATE TABLE IF NOT EXISTS userHistory(
   histID uuid DEFAULT uuid_generate_v4(),
+  ts timestamp default now(),
   img BYTEA,
   url VARCHAR(300),
   logo VARCHAR(300),

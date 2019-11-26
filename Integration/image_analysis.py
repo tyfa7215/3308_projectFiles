@@ -115,16 +115,16 @@ class LogoDataBase(object):
         except(Exception, psycopg2.Error):  # as error:
             return False
 
-    def save_history(self, img, user_id='default'):
+    def save_history(self, img, user_id='default', logo=''):
         if user_id == 'default':
             return True
         with open(img, "rb") as image:
             f = image.read()
             b = bytearray(f)
             img_data = psycopg2.Binary(b)
-        hist_insert_query = """INSERT INTO userHistory(img, username)
-                                                   VALUES(%s, %s);"""
-        hist_info = (img_data, user_id)
+        hist_insert_query = """INSERT INTO userHistory(img, username, logo)
+                                                   VALUES(%s, %s, %s);"""
+        hist_info = (img_data, user_id, logo)
 
         cursor = self.connection.cursor()
 
@@ -257,7 +257,7 @@ def user_execution_db(img_loc, username="default"):
     db = LogoDataBase(database="brandsense_db")
     # Create instance of our image analysis. This will create our cloud vision image obj
     image_analyzer = ImageAnalyzer(img_loc)
-    db.save_history(image_analyzer.img_path, username)
+    # db.save_history(image_analyzer.img_path, username)
     try:
         logos = image_analyzer.get_logo()
     except Exception as e:
@@ -267,6 +267,8 @@ def user_execution_db(img_loc, username="default"):
     if len(logos) is not 0:
         text = image_analyzer.get_text()
         colors = image_analyzer.get_color()
+
+        db.save_history(image_analyzer.img_path, username, logos[0])
 
         # An image could have multiple logos. For now we will search for all of them
         relevant_rows = []
@@ -292,7 +294,7 @@ def user_execution(img_loc, username="default"):
     # Create instance of our image analysis. This will create our cloud vision image obj
     image_analyzer = ImageAnalyzer(img_loc)
     db = LogoDataBase(database="brandsense_db")
-    db.save_history(image_analyzer.img_path, username)
+    # db.save_history(image_analyzer.img_path, username)
 
     try:
         logos = image_analyzer.get_logo()
@@ -302,6 +304,8 @@ def user_execution(img_loc, username="default"):
     if len(logos) is not 0:
         text = image_analyzer.get_text()
         colors = image_analyzer.get_color()
+
+        db.save_history(image_analyzer.img_path, username, logos[0])
 
         # An image could have multiple logos. For now we will search for all of them
         relevant_rows = []
