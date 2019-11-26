@@ -42,7 +42,6 @@ app.get('/', function(req, res) {
 app.post('/upload', upload.single('photo'), (req, res) => {
     if(req.file) {
         //console.log(req.file.filename)
-        
         //create child process, running python script and passing image as parameter
         var spawn = require("child_process").spawn;
         // We should do this. We can also set the 'T' to an 'F' and we would have what we had before.
@@ -56,20 +55,55 @@ app.post('/upload', upload.single('photo'), (req, res) => {
 		// All that need to be done is grabbing the row with the id that was spit out from the python. We do want
 		// a check to make sure it didn't return "not found" or something.
 		process.stdout.on('data', function(data) {
-		    raw_data = data.toString()
+			raw_data = data.toString()
+			console.log(raw_data)
+			if (raw_data.includes('Error'))
+			{
+				// We can make this display any text. But that might not actually be valuable.
+				var data = {
+					'img': "uploads/images/"+req.file.filename,
+					'logo': raw_data.replace('Error: ', ''),
+					'url': 'N/A',
+					'info': 'N/A'
+				}
+				res.render('display_scan',{
+					local_css:"styles.css", 
+					my_title:"Result Page",
+					result: data
+				});
+				return
+			}
             parsed_data = raw_data.replace(/\[/g, '').replace(/\]/g, '').replace(/\'/g, "").trim()
-            ids = parsed_data.split(',', 3)
-
-		    if (ids.length > 0)
-		    {
-		        // DB stuff to get relevant row
-		        res.send(ids);
-		    }
-		    else
-		    {
-		        res.send(raw_data);
-		    }
-	    } ) 
+			ids = parsed_data.split(',', 3)
+			query = 'select * from logos where logo_id=$1'
+			db.any(query, [ids[0]]).then(function (rows) {
+				row_data = rows[0]
+				var data = {
+					'img': "uploads/images/"+req.file.filename,
+					'logo': row_data.logo,
+					'url': row_data.link,
+					'info': row_data.info
+				}
+				res.render('display_scan',{
+					local_css:"styles.css", 
+					my_title:"Result Page",
+					result: data
+				});
+		
+			})
+			.catch(function (err) {
+				console.log('ERROR, ' + err)
+				// display error message in case an error
+				request.flash('error', err);
+				res.render('display_scan',{
+					local_css:"styles.css", 
+					my_title:"Home Page"
+	
+				});
+			})
+			
+			//res.send(ids[0]);
+	    }) 
     }
     else throw 'error';
 });

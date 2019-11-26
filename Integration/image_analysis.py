@@ -44,7 +44,7 @@ class LogoDataBase(object):
             self.connect()
 
         except (Exception, psycopg2.Error) as error:
-            print("Error while connecting to PostgreSQL", error)
+            print("Error: Connecting to PostgreSQL", error)
 
     def connect(self):
         self.connection = psycopg2.connect(self.connection_str)
@@ -261,8 +261,7 @@ def user_execution_db(img_loc, username="default"):
     try:
         logos = image_analyzer.get_logo()
     except Exception as e:
-        print("Failed connect. Try again later")
-        return "Error"
+        return "Error: Failed to connect. Try again later"
 
     if len(logos) is not 0:
         text = image_analyzer.get_text()
@@ -277,7 +276,7 @@ def user_execution_db(img_loc, username="default"):
         # This should always be in the form of a multidimensional array of strings
 
         if len(relevant_rows[0]) is 0:
-            return logos
+            return f'Error: Logo Not Supported: {logos}'
         return relevant_rows
 
     else:
@@ -371,7 +370,7 @@ if __name__ == '__main__':
             # db
 
     if img_path is None:
-        print(f'Image error. Invalid image location: {img_path}')
+        print(f'Error: Invalid image location: {img_path}')
 
     if img_path:
         if use_db:
