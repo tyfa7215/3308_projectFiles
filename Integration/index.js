@@ -38,6 +38,13 @@ app.get('/', function(req, res) {
 	});
 });
 
+app.get('/about', function(req, res) {
+	res.render('about',{
+		local_css:"styles.css", 
+		my_title:"About Page"
+	});
+});
+
 //reached after choosing image to upload on main page, runs python script and displays image info
 app.post('/upload', upload.single('photo'), (req, res) => {
     if(req.file) {
