@@ -101,13 +101,18 @@ class LogoDataBase(object):
             row = cursor.fetchone()
         return matching_logos, links
 
-    def insert_logo(self, customer, logo, colors, text, link, info):
+    def insert_logo(self, customer, logo, colors, text, link, info, img):
         # TODO: we need to make this a bit better protected. or we really don't i guess
         cursor = self.connection.cursor()
 
+        with open(img, "rb") as image:
+            f = image.read()
+            b = bytearray(f)
+            img_data = psycopg2.Binary(b)
+
         logo_insert_query = """INSERT INTO logos(customer ,logo , colors, text, link, info)
-                                           VALUES(%s, %s, %s, %s, %s, %s);"""
-        logo_info = (customer, logo, colors, text, link, info)
+                                           VALUES(%s, %s, %s, %s, %s, %s, %s);"""
+        logo_info = (customer, logo, colors, text, link, info, img_data)
 
         try:
             cursor.execute(logo_insert_query, logo_info)
@@ -348,7 +353,7 @@ def client_upload(customer, link, info, img_loc):
         colors = image_analyzer.get_color()
         for logo in logos:
             # This might be a special case for more than one logo. right now we only want the first
-            if not db.insert_logo(customer, logo, colors, text, link, info):
+            if not db.insert_logo(customer, logo, colors, text, link, info, img_loc):
                 return "failed upload"
             break
         return "Successful upload"
