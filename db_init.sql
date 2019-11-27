@@ -1,6 +1,6 @@
-CREATE TABLE brandsense_db
+create database brandsense_db;
 
-\c brandsense_db
+\c brandsense_db;
 
 then run these to create table
 
