@@ -123,7 +123,7 @@ app.get('/scans',function(req,res){
 			var history = {
 				'img': 'data:image/jpg;base64,' + Buffer.from(rows[i].img).toString('base64'),
 				'logo': rows[i].logo,
-				'url': "N/A"
+				'url': rows[i].url
 			}
 			scan_hist.push(history)
 		}

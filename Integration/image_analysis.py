@@ -73,6 +73,7 @@ class LogoDataBase(object):
             return []
 
         matching_logos = []
+        links = []
 
         row = cursor.fetchone()
         while row:
@@ -80,7 +81,7 @@ class LogoDataBase(object):
             logo_id = row[0]
             colors = row[3]
             text = row[4]
-            # link = row[4]
+            link = row[5]
             # info = row[5]
             # img = row[6]
 
@@ -89,13 +90,16 @@ class LogoDataBase(object):
             #  return a single one. But we could also just make text specific and this will be ok.
             if len(colors) is 0 and len(text) is 0:
                 matching_logos.append(logo_id)
+                links.append(link)
             elif len(set(logo_color).intersection(set(colors))) > 0:
                 matching_logos.append(logo_id)
+                links.append(link)
             elif len(set(logo_text).intersection(set(text))) > 0:
                 matching_logos.append(logo_id)
+                links.append(link)
 
             row = cursor.fetchone()
-        return matching_logos
+        return matching_logos, links
 
     def insert_logo(self, customer, logo, colors, text, link, info):
         # TODO: we need to make this a bit better protected. or we really don't i guess
@@ -115,16 +119,16 @@ class LogoDataBase(object):
         except(Exception, psycopg2.Error):  # as error:
             return False
 
-    def save_history(self, img, user_id='default', logo=''):
-        if user_id == 'default':
+    def save_history(self, img, user_id='default', logo='', url='N/A'):
+        if user_id == 'default':  # Basically dont save it
             return True
         with open(img, "rb") as image:
             f = image.read()
             b = bytearray(f)
             img_data = psycopg2.Binary(b)
-        hist_insert_query = """INSERT INTO userHistory(img, username, logo)
-                                                   VALUES(%s, %s, %s);"""
-        hist_info = (img_data, user_id, logo)
+        hist_insert_query = """INSERT INTO userHistory(img, username, logo, url)
+                                                   VALUES(%s, %s, %s, %s);"""
+        hist_info = (img_data, user_id, logo, url)
 
         cursor = self.connection.cursor()
 
@@ -267,19 +271,22 @@ def user_execution_db(img_loc, username="default"):
         text = image_analyzer.get_text()
         colors = image_analyzer.get_color()
 
-        db.save_history(image_analyzer.img_path, username, logos[0])
-
         # An image could have multiple logos. For now we will search for all of them
         relevant_rows = []
         for logo in logos:
-            relevant_rows.append(db.get_relevant_rows_from_logo(logo, colors, text))
+            rel_rows, links = db.get_relevant_rows_from_logo(logo, colors, text)
+            relevant_rows.append(rel_rows)
         # This should always be in the form of a multidimensional array of strings
 
         if len(relevant_rows[0]) is 0:
+            db.save_history(image_analyzer.img_path, username, logos[0], 'Logo Not Supported')
             return f'Error: Logo Not Supported: {logos}'
+        links.append('N/A')
+        db.save_history(image_analyzer.img_path, username, logos[0], links[0])
         return relevant_rows
 
     else:
+        db.save_history(image_analyzer.img_path, username, 'Could not detect logo')
         return f"Error: Unable to detect logo in image"
 
 
