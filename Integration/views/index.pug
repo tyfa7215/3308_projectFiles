@@ -27,6 +27,8 @@ html(lang='en', dir='ltr')
         #imageSelectLabel(onclick="document.getElementById('dataInput_2').click()")
           p Choose an Image
         input#dataInput_2(type='file' ,='' accept='image/*' name='photo' required='')
+      .dataInputContainer
+        input#dataInput_3(type='text' placeholder='Enter Image Description' name='description')
       button#submitForm(onclick='unloadImgUpload()' type='submit') Upload Image
     
     #uploadButton
