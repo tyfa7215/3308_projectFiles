@@ -5,6 +5,7 @@
 *{
   padding: 0;
   margin: 0;
+  text-align: center;
 }
 
 .mainNav {
@@ -327,6 +328,129 @@ input[type = "file"]{
     padding: 14px;
   }
   .mainNav input[type=text], .mainNav input[type=password] {
-    border: 1px solid #ccc; 
+    border: 1px solid #ccc;
+  }
+}
+
+/*Image Upload CSS*/
+#addImg{
+  position: absolute;
+  left: 170px;
+  height: 69px;
+  width: 180px;
+  border: none;
+  font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
+  background-color: #333;
+  color: var(--text-color);
+  text-align: center;
+  text-decoration: none;
+  font-size: 20px;
+}
+
+#addImg:hover{
+  background-color: var(--text-color);
+  color: white;
+}
+
+#uploadImg{
+  display: none;
+  background-color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  margin-top: 5%;
+  height: 500px;
+  width: 400px;
+  border-radius: 5%;
+  animation-fill-mode: forwards;
+  position: relative;
+  z-index: 10;
+}
+
+.animation_1{
+  animation: imgLoad 0.5s ease-in-out;
+}
+
+.animation_2{
+  animation: imgRelease 0.5s ease-in-out;
+}
+
+#uploadImgTitle{
+  position: relative;
+  top: 5%;
+  font-family: Arial, Helvetica, sans-serif;
+  color: white;
+  font-size: 30px;
+}
+
+.dataInputContainer{
+  margin: 15%;
+  display: inline-block;
+  position: relative;
+  top: 30px;
+}
+
+#dataInput_1{
+  display: inline-block;
+  position: relative;
+  right: 4%;
+  top: 30px;
+  width: 300px;
+  height: 35px;
+}
+
+#imageSelectLabel{
+  padding-top: 6%;
+  display: inline-block;
+  width: 200px;
+  height: 45px;
+  border-style: solid;
+  border-radius: 2%;
+  font-family: Arial, Helvetica, sans-serif;
+  color: white;
+  border-color: white;
+}
+
+#dataInput_2{
+  display: none;
+}
+
+#submitForm{
+  display: inline-block;
+  position: relative;
+  width: 100px;
+  height: 40px;
+  border-radius: 5%;
+  top: 60px;
+}
+
+@keyframes imgLoad {
+  0%{
+    transform: translateY(-100%);
+    opacity: 0%;
+  }
+
+  50%{
+    opacity: 50%;
+  }
+
+  100%{
+    opacity: 100%;
+    transform: translateY(0);
+  }
+}
+
+@keyframes imgRelease {
+  0%{
+    opacity: 100%;
+  }
+
+  50%{
+    opacity: 50%;
+  }
+
+  100%{
+    opacity: 0%;
+    transform: translateY(-100%);
   }
 }
