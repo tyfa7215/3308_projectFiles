@@ -118,8 +118,6 @@ app.post('/upload', upload.single('photo'), (req, res) => {
 app.post('/uploadimg', upload.single('photo'), (req, res) => {
     if(req.file) {
 		console.log('Adding image')
-		console.log(req.file.filename)
-		console.log(req.body.url)
         //console.log(req.file.filename)
         //create child process, running python script and passing image as parameter
         var spawn = require("child_process").spawn;
@@ -127,11 +125,11 @@ app.post('/uploadimg', upload.single('photo'), (req, res) => {
 		// image_analysis.py <relative_image_path> <T|F use db> <Username> <T|F upload iamge> <Url for logo> <description for logo> < uploading logo client(optional)> 
 		// So for uploading an image an example would be 
 		// image_analysis.py pink_nike.jpg T None T "http://www.nike.com" "Nikes Breast cancer awarness campain" Nike
-		var process = spawn('python3',["./image_analysis.py","uploads/images/"+req.file.filename, 'T', 'None', 'T', req.body.url, 'No Desc']);
+		var process = spawn('python3',["./image_analysis.py","uploads/images/"+req.file.filename, 'T', 'None', 'T', req.body.url, req.body.description]);
+		
 
 		process.stdout.on('data', function(data) 
 		{
-			console.log('Added?')
 			console.log(data.toString())
 			res.render('index',{
 				local_css:"styles.css", 
