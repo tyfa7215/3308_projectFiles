@@ -105,15 +105,9 @@ class LogoDataBase(object):
         # TODO: we need to make this a bit better protected. or we really don't i guess
         cursor = self.connection.cursor()
 
-        with open(img, "rb") as image:
-            f = image.read()
-            b = bytearray(f)
-            img_data = psycopg2.Binary(b)
-
         logo_insert_query = """INSERT INTO logos(customer ,logo , colors, text, link, info)
-                                           VALUES(%s, %s, %s, %s, %s, %s, %s);"""
-        logo_info = (customer, logo, colors, text, link, info, img_data)
-
+                                           VALUES(%s, %s, %s, %s, %s, %s);"""
+        logo_info = (customer, logo, colors, text, link, info)
         try:
             cursor.execute(logo_insert_query, logo_info)
             self.connection.commit()
@@ -121,7 +115,8 @@ class LogoDataBase(object):
             count = cursor.rowcount
             print(count, "Record inserted successfully into logo table")
             return True
-        except(Exception, psycopg2.Error):  # as error:
+        except(Exception, psycopg2.Error) as error:
+            print(error)
             return False
 
     def save_history(self, img, user_id='default', logo='', url='N/A'):
@@ -368,7 +363,11 @@ if __name__ == '__main__':
     # Retrieve "relevant rows" from db: image_analysis.py <relative_image_path> T <Username>
     # Save data to db: image_analysis.py <relative_image_path> T None T <link> <description> <client(optional)>
     # Example image_analysis.py starbucks.jpg T Ian
-    # UGHGH
+    # UGHGH using sys.argv is so annoying
+    # The Format for calling this file is as follows
+    # Arguments are denoted with <> brackets, <T|F denotes a true or false arguemnts, True or T will both work. Arguemnts are not case sensative. Use quotation marks around
+    # arguments with spaces.
+    # image_analysis.py <relative_image_path> <T|F use db> <Username> <T|F upload iamge> <Url for logo> <description for logo> < uploading logo client(optional)>
     img_path = None
     use_db = False
     username = "default"
@@ -377,7 +376,8 @@ if __name__ == '__main__':
         if len(sys.argv) > 2:
             use_db = (sys.argv[2].lower() == 't' or sys.argv[2].lower == 'true')
             if len(sys.argv) > 3:
-                username = sys.argv[3]
+                if sys.argv[3].lower != 'none':
+                    username = sys.argv[3]
             # We are forced to add these checks because we don't want any extra characters to break this and break the
             # db
 

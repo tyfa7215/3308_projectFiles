@@ -21,15 +21,16 @@ html(lang='en', dir='ltr')
     #uploadImg.animation_1
       #uploadImgTitle
         p Upload a New Image
-      .dataInputContainer
-        input#dataInput_1(type='text' placeholder='Enter Associated URL' name='url' required='')
-      .dataInputContainer
-        #imageSelectLabel.pointer(onclick="document.getElementById('dataInput_2').click()")
-          p Choose an Image
-        input#dataInput_2(type='file' ,='' accept='image/*' name='photo' required='')
-      .dataInputContainer
-        input#dataInput_3(type='text' placeholder='Enter Image Description' name='description')
-      button#submitForm.pointer(onclick='unloadImgUpload()' type='submit') Upload Image
+      form(action='/uploadimg', method='post', enctype='multipart/form-data', id='new_image_upload')
+        .dataInputContainer
+          input#dataInput_1(type='text' placeholder='Enter Associated URL' name='url' required='')
+        .dataInputContainer
+          #imageSelectLabel(onclick="document.getElementById('dataInput_2').click()")
+            p Choose an Image
+          input#dataInput_2(type='file' accept='image/*' name='photo' required='')
+        .dataInputContainer
+            input#dataInput_3(type='text' placeholder='Enter Image Description' name='description')
+        button#submitForm(onclick='unloadImgUpload()' type='submit') Upload Image
     
     #uploadButton
       .btn.btn-blob(onclick='document.getElementsByClassName("upload")[0].click()')
@@ -47,6 +48,7 @@ html(lang='en', dir='ltr')
     function unloadImgUpload(){
     document.getElementById('uploadImg').className = "animation_2";
     setTimeout(resetAnimation, 900);
+    document.getElementById("new_image_upload").submit();
     }
     
     function resetAnimation(){
