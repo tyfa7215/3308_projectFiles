@@ -144,7 +144,7 @@ class LogoDataBase(object):
 
 class ImageAnalyzer(object):
     credentials = service_account.Credentials.from_service_account_file(
-        'Brandsense-7eecace46bda.json')
+        'Brandsense-75f686e71eb4.json')
 
     def __init__(self, img):
         """
