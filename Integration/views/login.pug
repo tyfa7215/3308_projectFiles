@@ -1,0 +1,24 @@
+html(lang='en', dir='ltr')
+  head
+    meta(charset='utf-8')
+    link(rel='stylesheet', href='css/styles.css')
+    title BrandSense
+  body(onload = 'login')
+    .mainNav
+      .brand BrandSense
+      button#addImg(onclick="document.getElementById('uploadImg').style.display = 'flex'") Add Image
+      
+      a(href='/login') Login
+      a(href='/scans') Scans
+      a(href='/about') About
+      a(href='/') Home
+    
+    #loginContainer
+      .login-container
+        form(action='#')
+          .loginTitle
+            p Login
+          input.login(type='text', placeholder='Username', name='username')
+          input.login(type='password', placeholder='Password', name='psw')
+          button.loginButton(type='submit') Login
+          button.loginButton(type='submit') Create Account

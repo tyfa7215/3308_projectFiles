@@ -8,15 +8,12 @@ html(lang='en', dir='ltr')
     .mainNav
       .brand BrandSense
       button#addImg(onclick="document.getElementById('uploadImg').style.display = 'flex'") Add Image
-  
+      
+      a(href='/login') Login
       a(href='/scans') Scans
       a(href='/about') About
       a(href='/') Home
-      .login-container
-        form(action='#')
-          input(type='text', placeholder='Username', name='username')
-          input(type='password', placeholder='Password', name='psw')
-          button(type='submit') Login
+      
     
     #uploadImg.animation_1
       #uploadImgTitle
