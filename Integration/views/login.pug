@@ -14,10 +14,10 @@ html(lang='en', dir='ltr')
     
     #loginContainer
       .login-container
-        form(action='#')
+        form(action='auth',method='POST')
           .loginTitle
             p Login
           input.login(type='text', placeholder='Username', name='username')
-          input.login(type='password', placeholder='Password', name='psw')
+          input.login(type='password', placeholder='Password', name='password')
           button.loginButton(type='submit') Login
           button.loginButton(type='submit') Create Account

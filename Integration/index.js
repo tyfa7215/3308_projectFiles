@@ -15,14 +15,14 @@ app.use(
   })
 )
 
-const username = "ian";
+var username = null;
 
 const dbConfig = {
 	host: 'localhost',
 	port: 5432,
 	database: 'brandsense_db',
 	user: 'postgres',
-	password: '123'
+	password: '12345'
 };
 
 let db = pgp(dbConfig);
@@ -44,7 +44,40 @@ app.get('/about', function(req, res) {
 		my_title:"About Page"
 	});
 });
+app.post('/auth', function(req, res) {
+	var user = req.body.username;
+	var pass = req.body.password;
+	console.log(user+' , '+pass);
+	if (user && pass){
+		var query = "SELECT * FROM users WHERE username='"+user+"' AND password='"+pass+"';";
+		console.log(query);
 
+		db.any(query).then(function (rows) {
+		if (rows.length > 0){
+			username = user;
+			res.redirect('/')
+		}
+		else{
+			res.send('Incorrect username or password');
+		}
+		res.end();
+
+	})
+		.catch(function (err) {
+			console.log('ERROR, ' + err)
+		    // display error message in case an error
+		    request.flash('error', err);
+		    res.render('index',{
+		  	my_title: "Home Page",
+		  	local_css:"styles.css"
+			})
+		})
+	}
+	else {
+		res.send('Please enter Username and Password!');
+		res.end();
+	}
+});
 app.get('/login', function(req, res) {
 	res.render('login',{
 		local_css:"styles.css",
