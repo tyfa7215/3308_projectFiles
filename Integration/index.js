@@ -1,12 +1,14 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const app = express()
+const app = express(), http = require('http');
+const cookieParser = require('cookie-parser')
 const port = 3000
 const pug = require('pug')
 const multer = require('multer')//package for uploading images
 const upload = multer({dest: __dirname + '/uploads/images'});//directory to store uploaded images
 const pgp = require('pg-promise')();
 
+app.use(cookieParser())
 
 app.use(bodyParser.json())
 app.use(
@@ -15,7 +17,7 @@ app.use(
   })
 )
 
-var username = null;
+//var username = null;
 
 const dbConfig = {
 	host: 'localhost',
@@ -81,7 +83,12 @@ app.post('/auth', function(req, res) {
 
 		db.any(query, info).then(function (rows) {
 		if (rows.length > 0){
-			username = user;
+			//username = user;
+			var cookie = req.cookies.username;
+            res.cookie('username', user);
+            console.log('cookie created successfully');
+            // next(); // <-- important!
+
 			res.redirect('/')
 		}
 		else{
@@ -116,10 +123,21 @@ app.get('/login', function(req, res) {
 app.post('/upload', upload.single('photo'), (req, res) => {
     if(req.file) {
         //console.log(req.file.filename)
+
+        var username = req.cookies.username;
+        if (username === undefined)
+        {
+            username = 'None'
+        }
+        else
+        {
+            console.log('cookie exists', username);
+        }
+
         //create child process, running python script and passing image as parameter
         var spawn = require("child_process").spawn;
         // We should do this. We can also set the 'T' to an 'F' and we would have what we had before.
-        var process = spawn('python3',["./image_analysis.py","uploads/images/"+req.file.filename, 'T', username]);
+        var process = spawn('python',["./image_analysis.py","uploads/images/"+req.file.filename, 'T', username]);
 		// Here is what it was
 		// var process = spawn('python',["./image_analysis.py","uploads/images/"+req.file.filename] );
 
@@ -192,7 +210,7 @@ app.post('/uploadimg', upload.single('photo'), (req, res) => {
 		// image_analysis.py <relative_image_path> <T|F use db> <Username> <T|F upload iamge> <Url for logo> <description for logo> < uploading logo client(optional)>
 		// So for uploading an image an example would be
 		// image_analysis.py pink_nike.jpg T None T "http://www.nike.com" "Nikes Breast cancer awarness campain" Nike
-		var process = spawn('python3',["./image_analysis.py","uploads/images/"+req.file.filename, 'T', 'None', 'T', req.body.url, req.body.description]);
+		var process = spawn('python',["./image_analysis.py","uploads/images/"+req.file.filename, 'T', 'None', 'T', req.body.url, req.body.description]);
 
 
 		process.stdout.on('data', function(data)
@@ -210,6 +228,16 @@ app.post('/uploadimg', upload.single('photo'), (req, res) => {
 
 
 app.get('/scans',function(req,res){
+	var username = req.cookies.username;
+    if (username === undefined)
+    {
+        username = 'None'
+    }
+    else
+    {
+        console.log('cookie exists', username);
+    }
+
 	// This is the only safe way to have parameters for postgres
     query = "select * from userHistory where username=$1 ORDER BY ts DESC LIMIT 10"
 	// callback
