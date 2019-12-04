@@ -2,8 +2,6 @@ create database brandsense_db;
 
 \c brandsense_db;
 
-then run these to create table
-
 DROP TABLE logos;
 CREATE TABLE IF NOT EXISTS logos(
   logo_id uuid DEFAULT uuid_generate_v4(),
