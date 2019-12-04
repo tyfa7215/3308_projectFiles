@@ -49,10 +49,11 @@ app.post('/auth', function(req, res) {
 	var pass = req.body.password;
 	console.log(user+' , '+pass);
 	if (user && pass){
-		var query = "SELECT * FROM users WHERE username='"+user+"' AND password='"+pass+"';";
-		console.log(query);
+		var query = "SELECT * FROM users WHERE username=$1 AND password=$2;";
+		info = [user, pass]
+		console.log(query, info);
 
-		db.any(query).then(function (rows) {
+		db.any(query, info).then(function (rows) {
 		if (rows.length > 0){
 			username = user;
 			res.redirect('/')
