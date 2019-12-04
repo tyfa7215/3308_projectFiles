@@ -119,7 +119,7 @@ app.post('/upload', upload.single('photo'), (req, res) => {
         //create child process, running python script and passing image as parameter
         var spawn = require("child_process").spawn;
         // We should do this. We can also set the 'T' to an 'F' and we would have what we had before.
-        var process = spawn('python3',["./image_analysis.py","uploads/images/"+req.file.filename, 'T', username]);
+        var process = spawn('python',["./image_analysis.py","uploads/images/"+req.file.filename, 'T', username]);
 		// Here is what it was
 		// var process = spawn('python',["./image_analysis.py","uploads/images/"+req.file.filename] );
 
@@ -192,7 +192,7 @@ app.post('/uploadimg', upload.single('photo'), (req, res) => {
 		// image_analysis.py <relative_image_path> <T|F use db> <Username> <T|F upload iamge> <Url for logo> <description for logo> < uploading logo client(optional)>
 		// So for uploading an image an example would be
 		// image_analysis.py pink_nike.jpg T None T "http://www.nike.com" "Nikes Breast cancer awarness campain" Nike
-		var process = spawn('python3',["./image_analysis.py","uploads/images/"+req.file.filename, 'T', 'None', 'T', req.body.url, req.body.description]);
+		var process = spawn('python',["./image_analysis.py","uploads/images/"+req.file.filename, 'T', 'None', 'T', req.body.url, req.body.description]);
 
 
 		process.stdout.on('data', function(data)

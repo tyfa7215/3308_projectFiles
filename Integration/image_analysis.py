@@ -27,7 +27,7 @@ stop_words = ['tm', 'all', 'just', 'brands', 'being', 'over', 'both', 'through',
 class LogoDataBase(object):
     connection = None
 
-    def __init__(self, database='brandsense_db', user='postgres', passwd='123', host='localhost', port='5432'):
+    def __init__(self, database='brandsense_db', user='postgres', passwd='12345', host='localhost', port='5432'):
         """
         Create instance of connection. Saves the connection string if we need to reconnect for any reason.
         :param database: required
