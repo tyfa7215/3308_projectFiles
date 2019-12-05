@@ -32,7 +32,7 @@ head
             tr
               td= result.logo
               td= result.info
-              if result.url == 'Logo Not Supported'
+              if result.url == 'Logo Not Supported' || result.url == 'N/A'
                 td=result.url
               else
                 td
