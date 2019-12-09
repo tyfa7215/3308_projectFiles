@@ -6,7 +6,8 @@ Directory Structure:
 |--3308_projectFiles   
 &emsp;&emsp;|--css  
 &emsp;&emsp;&emsp;&emsp;|--styles.css  
+&emsp;&emsp;|--db   
+&emsp;&emsp;&emsp;&emsp;|--db_init.sql   
 
-  
 
   
