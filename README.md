@@ -12,7 +12,7 @@ Directory Structure:
 &emsp;&emsp;&emsp;&emsp;|--adidas_backpack.jpeg   
 &emsp;&emsp;&emsp;&emsp;|--cat.jpg   
 &emsp;&emsp;&emsp;&emsp;|--giraffe.jpg   
-&emsp;&emsp;&emsp;&emsp;|--img1.png
+&emsp;&emsp;&emsp;&emsp;|--img1.png   
 &emsp;&emsp;&emsp;&emsp;|--img2.png   
 &emsp;&emsp;&emsp;&emsp;|--img3.png   
 &emsp;&emsp;&emsp;&emsp;|--jaguar.jpeg   
