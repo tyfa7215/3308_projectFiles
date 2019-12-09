@@ -29,7 +29,7 @@ Directory Structure:
 &emsp;&emsp;&emsp;&emsp;|--index.pug   
 &emsp;&emsp;&emsp;&emsp;|--login.pug   
 &emsp;&emsp;&emsp;&emsp;|--scans.pug   
-&emsp;&emsp;|--.DS_Store
+&emsp;&emsp;|--.DS_Store   
 &emsp;&emsp;|--.gitignore   
 &emsp;&emsp;|--README.md   
 &emsp;&emsp;|--image_analysis.py   
