@@ -88,7 +88,7 @@ class LogoDataBase(object):
             # TODO: the more i think about this, it doesnt work. If a blue nike logo uploaded it could also output
             #  a pink one if they had the same text. SO we might want to look for both and if we cant find both then
             #  return a single one. But we could also just make text specific and this will be ok.
-            if len(colors) is 0 and len(text) is 0:
+            if len(colors) == 0 and len(text) == 0:
                 matching_logos.append(logo_id)
                 links.append(link)
             elif len(set(logo_color).intersection(set(colors))) > 0:
@@ -144,7 +144,7 @@ class LogoDataBase(object):
 
 class ImageAnalyzer(object):
     credentials = service_account.Credentials.from_service_account_file(
-        'Brandsense-75f686e71eb4.json')
+        'google_api_key.json')
 
     def __init__(self, img):
         """
@@ -267,7 +267,7 @@ def user_execution_db(img_loc, username="default"):
     except Exception as e:
         return "Error: Failed to connect. Try again later"
 
-    if len(logos) is not 0:
+    if len(logos) != 0:
         text = image_analyzer.get_text()
         colors = image_analyzer.get_color()
 
@@ -278,7 +278,7 @@ def user_execution_db(img_loc, username="default"):
             relevant_rows.append(rel_rows)
         # This should always be in the form of a multidimensional array of strings
 
-        if len(relevant_rows[0]) is 0:
+        if len(relevant_rows[0]) == 0:
             db.save_history(image_analyzer.img_path, username, logos[0], 'Logo Not Supported')
             return f'Error: Logo Not Supported: {logos}'
         links.append('N/A')
@@ -307,7 +307,7 @@ def user_execution(img_loc, username="default"):
     except Exception as e:
         return "Error: failed to establish connection with google cloud vision api. Try again later."
 
-    if len(logos) is not 0:
+    if len(logos) != 0:
         text = image_analyzer.get_text()
         colors = image_analyzer.get_color()
 
@@ -343,7 +343,7 @@ def client_upload(customer, link, info, img_loc):
     image_analyzer = ImageAnalyzer(img_loc)
 
     logos = image_analyzer.get_logo()
-    if len(logos) is not 0:
+    if len(logos) != 0:
         text = image_analyzer.get_text()
         colors = image_analyzer.get_color()
         for logo in logos:

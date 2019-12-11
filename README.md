@@ -9,7 +9,7 @@ Python: Install packages, `pip install virtualenv` and `pip install google-cloud
 More info on cloud vision. I didn’t follow the instructions provided but if the above doesn’t work try what they say.
 
 Usage For Everyone: 
-Use .json file in the google doc file as the credentials for the application, look at code implementation. 
+Use google_api_key.json file in the google doc file as the credentials for the application, look at code implementation. 
 VERY IMPORTANT: Do not push this JSON file to the repository or put publically online.
 For Postgres refer to the javascript file or the python for username and password.
 
