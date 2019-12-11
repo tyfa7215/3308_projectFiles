@@ -1,6 +1,6 @@
 # Brandsense
 
-The purpose of Brandsense is to allow for a more cosmetically apealing version of QR code scanning. Brandsense leverages Google Cloud Vision's machine learning to allow users to scan the actual logos of different brands that they are interested in. This gives companies the flexablitiy to use their own logo as a marketing tool rather than a QR code. Companies can sign up with us to add their logo images to our database as well as a webpage or discount code that they want the user to recieve when they scan the logo. This business model is great for company campeigns as they are able to create specialized logos for campaign purposes in order to give out promotions or advertise their website. 
+The purpose of Brandsense is to allow for a more cosmetically appealing version of QR code scanning. Brandsense leverages Google Cloud Vision's machine learning to allow users to scan the actual logos of different brands that they are interested in. This gives companies the flexibility to use their own logo as a marketing tool rather than a QR code. Companies can sign up with us to add their logo images to our database as well as a web page or discount code that they want the user to receive when they scan the logo. This business model is great for company campaigns as they are able to create specialized logos for campaign purposes in order to give out promotions or advertise their website. 
 
 
 INSTRUCTIONS FOR REQUIRED PACKAGES
@@ -10,7 +10,7 @@ More info on cloud vision. I didn’t follow the instructions provided but if th
 
 Usage For Everyone: 
 Use google_api_key.json file in the google doc file as the credentials for the application, look at code implementation. 
-VERY IMPORTANT: Do not push this JSON file to the repository or put publically online.
+VERY IMPORTANT: Do not push this JSON file to the repository or put publicly online.
 For Postgres refer to the javascript file or the python for username and password.
 
 
