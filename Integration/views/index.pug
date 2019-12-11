@@ -1,0 +1,57 @@
+doctype html
+html(lang='en', dir='ltr')
+  head
+    meta(charset='utf-8')
+    link(rel='stylesheet', href='css/styles.css')
+    title BrandSense
+  body(onload = 'login')
+    .mainNav
+      .brand BrandSense
+      button#addImg(onclick="document.getElementById('uploadImg').style.display = 'flex'") Add Image
+      
+      a(href='/login') Login
+      a(href='/scans') Scans
+      a(href='/about') About
+      a(href='/') Home
+      
+    
+    #uploadImg.animation_1
+      #uploadImgTitle
+        p Upload a New Image
+      form(action='/uploadimg', method='post', enctype='multipart/form-data', id='new_image_upload')
+        .dataInputContainer
+          input#dataInput_1(type='text' placeholder='Enter Associated URL' name='url' required='')
+        .dataInputContainer
+          #imageSelectLabel(onclick="document.getElementById('dataInput_2').click()")
+            p Choose an Image
+          input#dataInput_2(type='file' accept='image/*' name='photo' required='')
+        .dataInputContainer
+            input#dataInput_3(type='text' placeholder='Enter Image Description' name='description')
+        button#submitForm(onclick='unloadImgUpload()' type='submit') Upload Image
+    
+    #uploadButton
+      .btn.btn-blob(onclick='document.getElementsByClassName("upload")[0].click()')
+        form(action='/upload', method='post', enctype='multipart/form-data', id='image_upload')
+          input.upload(type='file', accept='image/*', name='photo', onchange='submitImage()')
+        script.cssdeck(src='//cdnjs.cloudflare.com/ajax/libs/jquery/1.8.0/jquery.min.js')
+
+  script.
+    function submitImage(){
+    document.getElementById("image_upload").submit();
+    }
+    
+    function login(){}
+    
+    function unloadImgUpload(){
+    document.getElementById('uploadImg').className = "animation_2";
+    setTimeout(resetAnimation, 900);
+    document.getElementById("new_image_upload").submit();
+    }
+    
+    function resetAnimation(){
+    var element = document.getElementById("uploadImg");
+    element.style.display = 'none';
+    element.classList.remove("animation_2");
+    void element.offsetWidth; // trigger a DOM reflow
+    element.classList.add("animation_1");
+    }

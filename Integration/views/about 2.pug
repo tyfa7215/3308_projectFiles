@@ -1,0 +1,74 @@
+doctype html
+// slideshow code from W3Schools.com
+head
+    meta(charset='utf-8')
+    link(rel='stylesheet' href='css/styles.css')
+    script(src='javascript/image_script.js')
+    title BrandSense
+body(onload='showSlides()' style='text-align: left')
+    .mainNav
+        .brand BrandSense
+        a(href='/login') Login
+        a(href='/scans') Scans
+        a(href='/about') About
+        a(href='/') Home
+    br
+    // Title
+    header(style='color:white; margin-left:40px; font-family:sans-serif')
+        h1 About
+        br
+        br
+        // Mission Statement
+        h3 Mission Statement
+    br
+    p(style='color:white; margin-left:80px; font-family:sans-serif')
+        | BrandSense aims to provide a streamlined, modern add campaigns for companies of all sizes.
+    br
+    // Members
+    header(style='color:white; margin-left:40px; font-family:sans-serif')
+        h3 Who is Brandsense?
+    br
+    header(style='color:white; margin-left:80px; font-family:sans-serif')
+        h4 Tyler Faragallah
+        h4 Ian Jorquera
+        h4 Yu Li
+        h4 Robert Meikle
+        h4 Jeremy Smolens
+        h4 Kevin Sullivan
+    br
+    // Description
+    header(style='color:white; margin-left:40px; font-family:sans-serif')
+        h3 What we Do
+    br
+    p(style='color:white; margin-left:80px; font-family:sans-serif')
+        | BrandSense offers an aesthetically pleasing replacement for QR codes. Through the power of Google Cloud Vision, we identify the logo of participating brands. After identifying a logo We take you to the whichever campaign the company is promoting with that particular logo.
+    br
+    // Why Us
+    header(style='color:white; margin-left:40px; font-family:sans-serif')
+        h3 Why Brandsense
+    br
+    p(style='color:white; margin-left:80px; font-family:sans-serif')
+        | QR codes work well for linking to websites, but lack the iconography of a company&apos;s logo. With BrandSense, companies can have the best of both worlds, using their distinctive logos and linking to whatever website they choose. Through our complex database, BrandSense offers fast logo identification, and quickly links to a brand&apos;s campaign.
+    br
+    // Brands
+    header(style='color:white; margin-left:40px; font-family:sans-serif')
+        h3 Participating Brands
+    br
+    // Slideshow container
+    .slideshow-container
+        center
+            // Full-width images with number and caption text
+            .mySlides.fade
+                img(src='../img/img1.png' width='256' height='256' id='image0')
+                //.text(style='color:white; font-family:sans-serif') BMW
+            .mySlides.fade
+                img(src='../img/img2.png' width='256' height='256' id='image1')
+                //.text(style='color:white; font-family:sans-serif') NIKE
+            .mySlides.fade
+                img(src='../img/img3.png' width='256' height='256' id='image2')
+                //.text(style='color:white; font-family:sans-serif') Kroger
+        // Next and previous buttons
+        a.prev(onclick='changeSlide(-2)') &#x276E;
+        a.next(onclick='changeSlide(0)') &#x276F;
+    br
+    script.cssdeck(src='//cdnjs.cloudflare.com/ajax/libs/jquery/1.8.0/jquery.min.js')
